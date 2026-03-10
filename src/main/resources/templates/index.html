@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App | Premium Experience</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Forecast</h1>
+        <div class="search-box">
+            <input type="text" id="city" placeholder="Search city..." autocomplete="off">
+            <button onclick="getGetWeather()">Search</button>
+        </div>
+        <div id="result">
+            <p>Enter a city name to get started.</p>
+        </div>
+    </div>
+
+    <script>
+        async function getGetWeather() {
+            const cityInput = document.getElementById("city");
+            const city = cityInput.value;
+            const resultDiv = document.getElementById("result");
+
+            if (!city) {
+                resultDiv.innerHTML = "<p>Please enter a city name.</p>";
+                return;
+            }
+
+            resultDiv.innerHTML = "<p>Fetching weather...</p>";
+
+            try {
+                const response = await fetch("/weather?city=" + city);
+                if (!response.ok) throw new Error("City not found");
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">${data.error}</p>`;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="weather-info">
+                        <div class="desc">${data.weather[0].description}</div>
+                        <div class="temp">${Math.round(data.main.temp)}°C</div>
+                        <div class="details">Humidity: ${data.main.humidity}% | Wind: ${data.wind.speed} m/s</div>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Add Enter key support
+        document.getElementById("city").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                getGetWeather();
+            }
+        });
+    </script>
+</body>
+</html>
